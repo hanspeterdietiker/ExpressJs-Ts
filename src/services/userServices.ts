@@ -1,40 +1,48 @@
-import { userDto } from "../dtos/userDto";
-import { User } from "../types/User";
+import User from "../context/User";
+import { UserNotFoundErrorException } from "../exceptions/UserNotFoundErrorException";
+import { BusinessException } from "../exceptions/BusinessException";
 
-
-const users: User[] = [
-    { id: 1, username: 'Hanspeter', email: 'contactdevhanspeter@gmail.com', password: '123' },
-    { id: 2, username: 'João', email: "joao@123.com", password: '1234' },
-]
-
-export const getAllUser = (): User[] => {
-    return users;
+export const getAllUser = async () => {
+    return await User.find()
 }
 
-export const getUserById = (id: number): User | undefined => {
-    return users.find(user => user.id === id)
-}
-export const createUser = (username: string, password: string, email: string): User => {
-    const newUser: User = {
-        id: users.length + 1,
-        username,
-        password,
-        email,
+export const getUserById = async (id: string) => {
+    try {
+        const user = await User.findById(id)
+        if (!user) {
+            throw new UserNotFoundErrorException(id)
+        }
+
+        return user
+    } catch (error) {
+        throw new BusinessException("ERROR: Contact the IT department")
     }
-    users.push(newUser)
-    return newUser
 }
-export function editUser(id: number, username?: string, password?: string): userDto | null {
 
-    const user = users.find(user => user.id === id);
-    if (!user) {
-        return null;
+export const createUser = async (username: string, email: string, password:string) => {
+    const newUser = new User({ username,email , password })
+    return await newUser.save()
+}
+
+
+export const editUser = async (id: string, username?: string, email?: string,password?: string) => {
+    try {
+        const userUpdated = await User.findByIdAndUpdate(
+
+            id,
+            { username, password, email },
+            { new: true }
+        )
+
+        if (!userUpdated) {
+            throw new UserNotFoundErrorException(id)
+        }
+
+        return userUpdated
+
+    } catch (error) {
+        throw new BusinessException("ERROR: Contact the IT department")
     }
 
 
-    if (username) user.username = username;
-    if (password) user.password = password;
-
-
-    return { id: user.id, username: user.username, email: user.email, password: user.password };
 }
