@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import { getAllUser, getUserById, editUser, createUser } from "../services/userServices";
+import Api404Error from "../exceptions/StatusCodeException/ApiError/Api404Error";
+import Api400Error from "../exceptions/StatusCodeException/ApiError/Api400Error";
 
 export const getUserHandler = async (req: Request, res: Response) => {
     const users = await getAllUser()
@@ -12,14 +14,14 @@ export const getUserByIdHandler = async (req: Request, res: Response) => {
 
     user
         ? res.status(200).json(user)
-        : res.status(404).json({ errorMessage: "User not Found" })
+        : res.status(404).json({ Api404Error })
 }
 
 export const createUserHandler = async (req: Request, res: Response): Promise<void> => {
     const { username, email, password } = req.body
 
     if (!email || !username || !password) {
-        res.status(400).json({ errorMessage: "Insert correct Email, UserName and Password" })
+        res.status(400).json({ Api400Error })
         return
     }
     const user = await createUser(username, email, password)
@@ -33,7 +35,7 @@ export const editUserHandler = async (req: Request, res: Response): Promise<void
 
     const updateUser = await editUser(username, password, email)
     if (!updateUser) {
-        res.status(404).json({ error: "User not found" });
+        res.status(404).json({Api404Error });
         return
     }
 

@@ -1,5 +1,5 @@
 import User from "../context/User";
-import { UserNotFoundErrorException } from "../exceptions/UserNotFoundErrorException";
+import { UserNotFoundException } from "../exceptions/UserNotFoundException";
 import { BusinessException } from "../exceptions/BusinessException";
 
 export const getAllUser = async () => {
@@ -10,7 +10,7 @@ export const getUserById = async (id: string) => {
     try {
         const user = await User.findById(id)
         if (!user) {
-            throw new UserNotFoundErrorException(id)
+            throw new UserNotFoundException(id)
         }
 
         return user
@@ -35,7 +35,7 @@ export const editUser = async (id: string, username?: string, email?: string,pas
         )
 
         if (!userUpdated) {
-            throw new UserNotFoundErrorException(id)
+            throw new UserNotFoundException(id)
         }
 
         return userUpdated
